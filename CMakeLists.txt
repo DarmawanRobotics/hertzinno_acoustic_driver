@@ -39,3 +39,18 @@ install(TARGETS hertzinno_client
 )
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
+if(CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(test_crypto test/test_crypto.cpp test/main.cpp)
+  target_link_libraries(test_crypto hertzinno_client)
+  catkin_add_gtest(test_api test/test_api.cpp test/main.cpp)
+  target_link_libraries(test_api hertzinno_client)
+  catkin_add_gtest(test_detection test/test_detection.cpp test/main.cpp)
+  target_link_libraries(test_detection hertzinno_client)
+  catkin_add_gtest(test_websocket test/test_websocket.cpp test/main.cpp TIMEOUT 60)
+  target_link_libraries(test_websocket hertzinno_client)
+  # end to end against test/fake_device.py (HTTP, token, WebSocket streams, detections)
+  catkin_add_gtest(test_device_fake test/test_device_fake.cpp test/main.cpp TIMEOUT 120)
+  target_link_libraries(test_device_fake hertzinno_client nlohmann_json::nlohmann_json)
+  target_compile_definitions(test_device_fake PRIVATE
+    FAKE_DEVICE_PY="${CMAKE_CURRENT_SOURCE_DIR}/test/fake_device.py")
+endif()
