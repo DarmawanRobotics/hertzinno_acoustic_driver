@@ -101,7 +101,7 @@ check "set_video bad resolution" "success: False" \
   rosservice call $ns/set_video "{width: 1000, height: 1000}"
 check "set_detection_area" "width: 320" rosservice call $ns/set_detection_area \
   "{enabled: true, x: 100, y: 80, width: 320, height: 240}"
-check "set_leakage outside leakage mode" "only available in leakage mode" \
+check "set_leakage outside leakage mode" "HTTP 400: leakage estimation" \
   rosservice call $ns/set_leakage "{field: monetary_unit, value: 2}"
 
 # ---- detections
