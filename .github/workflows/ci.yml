@@ -1,0 +1,104 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-22.04
+    container: ros:noetic-ros-base-focal
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/hertzinno_acoustic_driver
+      - name: Dependencies
+        run: |
+          deps() {
+            set -e
+            # The image predates the ROS apt key rotation (2025): fetch the current key first.
+            rm -f /etc/apt/sources.list.d/ros*.list
+            apt-get update
+            apt-get install -y --no-install-recommends curl ca-certificates
+            curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+              -o /usr/share/keyrings/ros-archive-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros/ubuntu focal main" \
+              > /etc/apt/sources.list.d/ros1.list
+            apt-get update
+            # Noetic is end-of-life: rosdep skips it unless asked
+            rosdep update --rosdistro noetic --include-eol-distros
+            rosdep install --from-paths src --ignore-src -y --rosdistro noetic
+          }
+          result=0
+          (deps) > deps.txt 2>&1 || result=$?
+          cat deps.txt
+          if [ "$result" != 0 ]; then
+            msg=$(tail -n 60 deps.txt \
+              | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=Dependencies::$msg"
+          fi
+          exit "$result"
+      - name: Build
+        run: |
+          source /opt/ros/noetic/setup.bash
+          result=0
+          catkin_make -DCMAKE_BUILD_TYPE=RelWithDebInfo > build.txt 2>&1 || result=$?
+          cat build.txt
+          if [ "$result" != 0 ]; then
+            msg=$(grep -E -B2 -A6 "error|Error" build.txt | head -c 30000 \
+              | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=Build::$msg"
+          fi
+          exit "$result"
+      - name: Test
+        run: |
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash
+          result=0
+          catkin_make run_tests > run-tests.txt 2>&1 || result=$?
+          cat run-tests.txt
+          if [ "$result" != 0 ]; then
+            msg=$(grep -E -B3 -A12 "error|Error|FAILED|Failure" run-tests.txt | head -c 30000 \
+              | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=run_tests::$msg"
+          fi
+          catkin_test_results build/test_results --verbose > test-result.txt 2>&1 || result=$?
+          cat test-result.txt
+          # the summary (and failures) as annotations, readable without the raw log
+          echo "::notice title=Tests::$(grep -E '^Summary' test-result.txt | tail -n 1)"
+          if [ "$result" != 0 ]; then
+            msg=$(head -c 30000 test-result.txt \
+              | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=Failing tests::$msg"
+            exit 1
+          fi
+      - name: Smoke test (launch against a fake camera)
+        run: |
+          source /opt/ros/noetic/setup.bash
+          source devel/setup.bash
+          result=0
+          bash src/hertzinno_acoustic_driver/test/smoke_test.sh > smoke.txt 2>&1 || result=$?
+          cat smoke.txt
+          echo "::notice title=Smoke test::$(grep -c '^ok' smoke.txt) ok, $(grep -c '^FAIL' smoke.txt) failed"
+          if [ "$result" != 0 ]; then
+            msg=$(head -c 30000 smoke.txt \
+              | sed -e ':a' -e 'N' -e '$!ba' -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g')
+            echo "::error title=Smoke test output::$msg"
+          fi
+          exit "$result"
+      - name: Test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/test_results/**/*.xml
+          if-no-files-found: ignore
