@@ -1,0 +1,12 @@
+# A photo or video of a detection (GET /detect_file/<saving_path>/<file_name>).
+string saving_path
+string file_name
+string save_to                # directory on this computer: stored as <save_to>/<saving_path>/<file_name>
+                              # empty: returned in data
+---
+bool success
+string message
+string path                   # where it was saved
+string content_type
+uint32 size
+uint8[] data

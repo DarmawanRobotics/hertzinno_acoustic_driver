@@ -7,15 +7,51 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra)
 endif()
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  std_srvs
+  sensor_msgs
+  actionlib
+  actionlib_msgs
+  message_generation
+)
 find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json 3 REQUIRED)
 
+add_message_files(FILES
+  AcousticStatus.msg
+  DetectionArea.msg
+  DetectionConfig.msg
+  DetectionResult.msg
+  LeakageConfig.msg
+  RawFrame.msg
+  Spectrum.msg
+  VideoConfig.msg
+)
+add_service_files(FILES
+  DeleteLogs.srv
+  GetConfig.srv
+  GetFile.srv
+  GetLogs.srv
+  RawRequest.srv
+  SetBand.srv
+  SetDetectionArea.srv
+  SetLeakage.srv
+  SetValue.srv
+  SetVideo.srv
+)
+add_action_files(FILES
+  Detect.action
+)
+generate_messages(DEPENDENCIES std_msgs sensor_msgs actionlib_msgs)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES hertzinno_client
+  CATKIN_DEPENDS roscpp std_msgs std_srvs sensor_msgs actionlib actionlib_msgs message_runtime
 )
 
 # Camera client: HTTP with token login, JSON messages, WebSocket streams. No ROS.

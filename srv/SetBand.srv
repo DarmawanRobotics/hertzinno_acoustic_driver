@@ -1,0 +1,8 @@
+# Analysis band, whole kHz: 2 <= up - down <= 20, up at most half the sample rate (48 kHz at
+# 96 kHz, 65 kHz at 130 kHz).
+int32 freq_down_limit
+int32 freq_up_limit
+---
+bool success
+string message
+DetectionConfig config        # read back from the camera

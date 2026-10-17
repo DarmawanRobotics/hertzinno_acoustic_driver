@@ -1,0 +1,10 @@
+# Any HTTP request to the camera, with the login token. The body is sent as application/json.
+string method                 # GET, PUT, POST, DELETE
+string path                   # starts with '/', e.g. /system
+string body
+---
+bool success                  # HTTP 2xx
+int32 status
+string content_type
+string body                   # text answers; binary ones are only described
+string message

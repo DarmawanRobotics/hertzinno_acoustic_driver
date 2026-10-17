@@ -1,0 +1,5 @@
+# Delete detection records (and their files) on the camera.
+int32[] ids
+---
+bool success
+string message

@@ -1,0 +1,9 @@
+# Everything the camera lets you configure.
+---
+bool success
+string message
+DetectionConfig detection
+VideoConfig video
+DetectionArea area
+bool has_leakage              # leak estimation exists in leakage mode only
+LeakageConfig leakage

@@ -1,0 +1,6 @@
+# set_threshold: imaging threshold, 0..100 dB. set_duration: detection time, s.
+int32 value
+---
+bool success
+string message
+DetectionConfig config        # read back from the camera
