@@ -22,10 +22,18 @@
   <depend>sensor_msgs</depend>
   <depend>actionlib</depend>
   <depend>actionlib_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>libopencv-dev</depend>
 
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>roslaunch</exec_depend>
+  <!-- RTSP decoding: rtspsrc, depayloader/parser, avdec_h264; compressed image topics -->
+  <exec_depend>gstreamer1.0-plugins-good</exec_depend>
+  <exec_depend>gstreamer1.0-plugins-bad</exec_depend>
+  <exec_depend>gstreamer1.0-libav</exec_depend>
+  <exec_depend>image_transport_plugins</exec_depend>
 
   <test_depend>rosunit</test_depend>
   <test_depend>python3</test_depend>

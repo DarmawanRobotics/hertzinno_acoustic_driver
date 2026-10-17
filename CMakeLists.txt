@@ -15,7 +15,10 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   message_generation
+  cv_bridge
+  image_transport
 )
+find_package(OpenCV REQUIRED COMPONENTS core imgproc videoio)
 find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
@@ -50,8 +53,9 @@ generate_messages(DEPENDENCIES std_msgs sensor_msgs actionlib_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES hertzinno_client
+  LIBRARIES hertzinno_client hertzinno_rtsp
   CATKIN_DEPENDS roscpp std_msgs std_srvs sensor_msgs actionlib actionlib_msgs message_runtime
+    cv_bridge image_transport
 )
 
 # Camera client: HTTP with token login, JSON messages, WebSocket streams. No ROS.
@@ -81,11 +85,22 @@ target_link_libraries(hertzinno_acoustic_node hertzinno_client ${catkin_LIBRARIE
 add_dependencies(hertzinno_acoustic_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS hertzinno_acoustic_node
+# RTSP capture and path discovery (OpenCV, no ROS) and the camera node: the sound map video
+add_library(hertzinno_rtsp src/rtsp_capture.cpp src/rtsp_probe.cpp)
+target_include_directories(hertzinno_rtsp PUBLIC include)
+target_include_directories(hertzinno_rtsp SYSTEM PUBLIC ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(hertzinno_rtsp hertzinno_client ${OpenCV_LIBS} Threads::Threads)
+
+add_executable(hertzinno_camera_node src/camera_node.cpp)
+target_include_directories(hertzinno_camera_node PRIVATE include ${catkin_INCLUDE_DIRS})
+target_link_libraries(hertzinno_camera_node hertzinno_rtsp ${catkin_LIBRARIES})
+add_dependencies(hertzinno_camera_node ${catkin_EXPORTED_TARGETS})
+
+install(TARGETS hertzinno_acoustic_node hertzinno_camera_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(DIRECTORY launch config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-install(TARGETS hertzinno_client
+install(TARGETS hertzinno_client hertzinno_rtsp
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
@@ -106,4 +121,6 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(test_device_fake hertzinno_client nlohmann_json::nlohmann_json)
   target_compile_definitions(test_device_fake PRIVATE
     FAKE_DEVICE_PY="${CMAKE_CURRENT_SOURCE_DIR}/test/fake_device.py")
+  catkin_add_gtest(test_rtsp test/test_rtsp.cpp test/main.cpp TIMEOUT 60)
+  target_link_libraries(test_rtsp hertzinno_rtsp)
 endif()
