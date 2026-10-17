@@ -1,0 +1,12 @@
+# Detection records kept by the camera (the latest 100). Zeros take the defaults.
+uint32 start                  # first record, 1-based (0: 1)
+uint32 count                  # how many (0: 100)
+int64 start_time              # unix time on the camera clock (0: no limit)
+int64 end_time                # (0: no limit)
+int32 types                   # status bits to include (0: all of the mode)
+uint8 detect_mode             # 1 partial discharge, 2 leakage (0: the current work mode)
+---
+bool success
+string message
+int32 total                   # matching records on the camera
+DetectionResult[] logs

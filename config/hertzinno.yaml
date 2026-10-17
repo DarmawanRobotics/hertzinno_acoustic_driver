@@ -1,0 +1,29 @@
+# hertzinno_acoustic_node. host, port, user and password come from the launch file; the password
+# preferably from $HERTZINNO_PASSWORD (password_env), so roslaunch never prints it.
+password_env: HERTZINNO_PASSWORD
+timeout: 3.0                 # s, HTTP requests
+file_timeout: 30.0           # s, photos and videos of a detection
+frame_id: hertzinno_acoustic_optical_frame
+
+status_rate: 1.0             # Hz, detection state polling and the status topic
+config_period: 10.0          # s, re-read the detection settings
+
+# Applied at every (re)connection; -1 keeps what is set on the camera
+db_limit: -1                 # imaging threshold, 0..100 dB
+freq_down_limit: -1          # analysis band, kHz (both, 2 to 20 kHz wide)
+freq_up_limit: -1
+detect_times: -1             # detection time, s
+
+# WebSocket streams (ws://<host>:<ws_port>/...)
+ws_port: 0                   # 0: same as port
+heartbeat_sec: 20.0          # the camera drops clients silent for a minute
+streams:
+  feedback: true             # detectFeedback: the detection topic and the detect action
+  fft: true                  # spectrum, 5 Hz
+  prpd: true                 # raw PRPD frames, 1 Hz
+  voiceprint: true           # raw voiceprint frames, 1 Hz
+
+# detect action
+detect_timeout_margin: 15.0  # s added to the detection time when the goal sets no timeout
+result_grace: 5.0            # s to wait for the result after the camera stops detecting
+photo_wait: 8.0              # s to keep trying photos the camera is still writing

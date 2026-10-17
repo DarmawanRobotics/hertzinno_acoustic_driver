@@ -7,15 +7,51 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra)
 endif()
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  std_msgs
+  std_srvs
+  sensor_msgs
+  actionlib
+  actionlib_msgs
+  message_generation
+)
 find_package(Threads REQUIRED)
 find_package(CURL REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(nlohmann_json 3 REQUIRED)
 
+add_message_files(FILES
+  AcousticStatus.msg
+  DetectionArea.msg
+  DetectionConfig.msg
+  DetectionResult.msg
+  LeakageConfig.msg
+  RawFrame.msg
+  Spectrum.msg
+  VideoConfig.msg
+)
+add_service_files(FILES
+  DeleteLogs.srv
+  GetConfig.srv
+  GetFile.srv
+  GetLogs.srv
+  RawRequest.srv
+  SetBand.srv
+  SetDetectionArea.srv
+  SetLeakage.srv
+  SetValue.srv
+  SetVideo.srv
+)
+add_action_files(FILES
+  Detect.action
+)
+generate_messages(DEPENDENCIES std_msgs sensor_msgs actionlib_msgs)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES hertzinno_client
+  CATKIN_DEPENDS roscpp std_msgs std_srvs sensor_msgs actionlib actionlib_msgs message_runtime
 )
 
 # Camera client: HTTP with token login, JSON messages, WebSocket streams. No ROS.
@@ -32,6 +68,23 @@ target_include_directories(hertzinno_client SYSTEM PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(hertzinno_client
   ${CURL_LIBRARIES} OpenSSL::Crypto nlohmann_json::nlohmann_json Threads::Threads)
 
+# The node: status and settings, detect action and records, WebSocket streams as topics
+add_executable(hertzinno_acoustic_node
+  src/acoustic_node.cpp
+  src/ros_utils.cpp
+  src/status_interface.cpp
+  src/detection_interface.cpp
+  src/stream_interface.cpp
+)
+target_include_directories(hertzinno_acoustic_node PRIVATE include ${catkin_INCLUDE_DIRS})
+target_link_libraries(hertzinno_acoustic_node hertzinno_client ${catkin_LIBRARIES})
+add_dependencies(hertzinno_acoustic_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+install(TARGETS hertzinno_acoustic_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY launch config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(TARGETS hertzinno_client
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

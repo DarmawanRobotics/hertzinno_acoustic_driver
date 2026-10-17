@@ -1,0 +1,17 @@
+# Run one acoustic detection and wait for its result. The measurement always starts after the
+# goal: a detection already running (continuous monitoring) is restarted first.
+float32 duration              # s, detection time; 0 keeps the camera's setting (detect_times)
+float32 timeout               # s, 0: duration + detect_timeout_margin
+bool keep_running             # leave detection on afterwards (continuous monitoring)
+bool fetch_photos             # download the sound map and PRPD photos of the result
+---
+bool success
+string state                  # detected | no_result | timeout | preempted | error
+string message
+DetectionResult result
+sensor_msgs/CompressedImage soundmap_photo
+sensor_msgs/CompressedImage prpd_photo
+---
+float32 elapsed               # s since the detection started
+bool detecting                # the camera reports a running detection
+string state                  # starting | detecting

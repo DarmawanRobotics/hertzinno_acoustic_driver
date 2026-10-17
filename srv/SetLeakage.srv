@@ -1,0 +1,10 @@
+# One leak estimation setting (leakage mode). field: leakage_distance (0 = 0.5 m, 1 = 1 m,
+# 2 = 2 m, 3 = 5 m), leakage_unit (0 l/min, 1 ml/s), monetary_unit (0 CNY, 1 GBP, 2 USD,
+# 3 EUR, 4 RUB), cost_display (0 / 1), value_of_gas (per m3), energy_cost (per kWh),
+# specific_power (kW/(m3/min)) or working_hours (h per year).
+string field
+float64 value
+---
+bool success
+string message
+LeakageConfig config          # read back from the camera

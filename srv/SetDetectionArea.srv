@@ -1,0 +1,10 @@
+# Report only sources inside this box (video pixels). enabled: false removes the box.
+bool enabled
+int32 x
+int32 y
+int32 width
+int32 height
+---
+bool success
+string message
+DetectionArea area            # read back from the camera

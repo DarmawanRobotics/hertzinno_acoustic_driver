@@ -1,0 +1,21 @@
+<launch>
+  <!-- Hertzinno HZ-FA-371 online acoustic camera. The password comes from $HERTZINNO_PASSWORD
+       (or password:=, which roslaunch prints); without either the factory default is tried. -->
+  <arg name="namespace" default="hertzinno"/>
+  <arg name="host" default="192.168.2.204"/>
+  <arg name="port" default="80"/>
+  <arg name="user" default="admin"/>
+  <arg name="password" default=""/>
+  <arg name="config" default="$(find hertzinno_acoustic_driver)/config/hertzinno.yaml"/>
+
+  <group ns="$(arg namespace)">
+    <node pkg="hertzinno_acoustic_driver" type="hertzinno_acoustic_node" name="acoustic"
+          output="screen" respawn="true" respawn_delay="5">
+      <rosparam command="load" file="$(arg config)"/>
+      <param name="host" type="str" value="$(arg host)"/>
+      <param name="port" type="int" value="$(arg port)"/>
+      <param name="user" type="str" value="$(arg user)"/>
+      <param name="password" type="str" value="$(arg password)"/>
+    </node>
+  </group>
+</launch>
