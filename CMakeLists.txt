@@ -68,6 +68,23 @@ target_include_directories(hertzinno_client SYSTEM PRIVATE ${CURL_INCLUDE_DIRS})
 target_link_libraries(hertzinno_client
   ${CURL_LIBRARIES} OpenSSL::Crypto nlohmann_json::nlohmann_json Threads::Threads)
 
+# The node: status and settings, detect action and records, WebSocket streams as topics
+add_executable(hertzinno_acoustic_node
+  src/acoustic_node.cpp
+  src/ros_utils.cpp
+  src/status_interface.cpp
+  src/detection_interface.cpp
+  src/stream_interface.cpp
+)
+target_include_directories(hertzinno_acoustic_node PRIVATE include ${catkin_INCLUDE_DIRS})
+target_link_libraries(hertzinno_acoustic_node hertzinno_client ${catkin_LIBRARIES})
+add_dependencies(hertzinno_acoustic_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+install(TARGETS hertzinno_acoustic_node
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY launch config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(TARGETS hertzinno_client
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
