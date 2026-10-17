@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   message_generation
+  cv_bridge
+  image_transport
 )
 find_package(OpenCV REQUIRED COMPONENTS core imgproc videoio)
 find_package(Threads REQUIRED)
@@ -53,6 +55,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES hertzinno_client hertzinno_rtsp
   CATKIN_DEPENDS roscpp std_msgs std_srvs sensor_msgs actionlib actionlib_msgs message_runtime
+    cv_bridge image_transport
 )
 
 # Camera client: HTTP with token login, JSON messages, WebSocket streams. No ROS.
@@ -82,13 +85,18 @@ target_link_libraries(hertzinno_acoustic_node hertzinno_client ${catkin_LIBRARIE
 add_dependencies(hertzinno_acoustic_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-# RTSP capture and path discovery (OpenCV, no ROS)
+# RTSP capture and path discovery (OpenCV, no ROS) and the camera node: the sound map video
 add_library(hertzinno_rtsp src/rtsp_capture.cpp src/rtsp_probe.cpp)
 target_include_directories(hertzinno_rtsp PUBLIC include)
 target_include_directories(hertzinno_rtsp SYSTEM PUBLIC ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(hertzinno_rtsp hertzinno_client ${OpenCV_LIBS} Threads::Threads)
 
-install(TARGETS hertzinno_acoustic_node
+add_executable(hertzinno_camera_node src/camera_node.cpp)
+target_include_directories(hertzinno_camera_node PRIVATE include ${catkin_INCLUDE_DIRS})
+target_link_libraries(hertzinno_camera_node hertzinno_rtsp ${catkin_LIBRARIES})
+add_dependencies(hertzinno_camera_node ${catkin_EXPORTED_TARGETS})
+
+install(TARGETS hertzinno_acoustic_node hertzinno_camera_node
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 install(DIRECTORY launch config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
