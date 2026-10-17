@@ -9,8 +9,9 @@ detectFeedback after each detection; clients silent for --ws-idle seconds are dr
 manual says the camera does.
 RTSP: answers DESCRIBE for --rtsp-path only (no media), to test path discovery.
 
-Every request is logged as "METHOD path body" (--log) for the smoke test, and GET /debug/state
-reports counters for the unit tests. Python 3.8, standard library only.
+Every request is logged as "METHOD path body" (--log) for the smoke test; GET /debug/state
+reports counters and POST /debug/set changes the behaviour at run time (no_feedback,
+continuous, hang, result, mode). Python 3.8, standard library only.
 """
 
 import argparse
@@ -147,6 +148,7 @@ class Device:
         self.next_id = 1
         self.feedback = set()
         self.result_name = args.result or ('leak' if args.mode == 2 else 'surface')
+        self.hang = False                 # detections that never finish
 
     def log(self, line):
         with self.log_lock:
@@ -202,7 +204,7 @@ class Device:
             with self.lock:
                 seconds = self.system['detect_times']
             end_at = time.monotonic() + seconds
-            while time.monotonic() < end_at:
+            while time.monotonic() < end_at or self.hang:
                 time.sleep(0.02)
                 with self.lock:
                     if self.generation != gen:
@@ -335,6 +337,19 @@ class Handler(BaseHTTPRequestHandler):
         if dev.args.latency:
             time.sleep(dev.args.latency)
 
+        if path == '/debug/set' and method == 'POST':
+            change = json.loads(body or b'{}')
+            with dev.lock:
+                for key in ('no_feedback', 'continuous'):
+                    if key in change:
+                        setattr(dev.args, key, bool(change[key]))
+                if 'hang' in change:
+                    dev.hang = bool(change['hang'])
+                if 'result' in change:
+                    dev.result_name = change['result']
+                if 'mode' in change:
+                    dev.system['work_mode'] = int(change['mode'])
+            return self.reply(200, {'code': 0})
         if path == '/debug/state':
             with dev.lock:
                 state = dict(dev.counters, detecting=dev.detecting, logs=len(dev.logs),
