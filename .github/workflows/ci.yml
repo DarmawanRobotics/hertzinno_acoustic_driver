@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: src/hertzinno_acoustic_driver
+          path: src/hertzino_driver          # repo berisi hertzino_msgs + hertzino_driver
       - name: Dependencies
         run: |
           deps() {
@@ -73,7 +73,6 @@ jobs:
           fi
           catkin_test_results build/test_results --verbose > test-result.txt 2>&1 || result=$?
           cat test-result.txt
-          # the summary (and failures) as annotations, readable without the raw log
           echo "::notice title=Tests::$(grep -E '^Summary' test-result.txt | tail -n 1)"
           if [ "$result" != 0 ]; then
             msg=$(head -c 30000 test-result.txt \
@@ -86,7 +85,7 @@ jobs:
           source /opt/ros/noetic/setup.bash
           source devel/setup.bash
           result=0
-          bash src/hertzinno_acoustic_driver/test/smoke_test.sh > smoke.txt 2>&1 || result=$?
+          bash src/hertzino_driver/hertzino_driver/test/smoke_test.sh > smoke.txt 2>&1 || result=$?
           cat smoke.txt
           echo "::notice title=Smoke test::$(grep -c '^ok' smoke.txt) ok, $(grep -c '^FAIL' smoke.txt) failed"
           if [ "$result" != 0 ]; then
