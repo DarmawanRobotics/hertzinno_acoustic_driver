@@ -1,6 +1,6 @@
 <div align="center">
 
-# HERTZINO ACUSTIC CAMERA DRIVER
+# hertzino_driver
 
 **ROS Noetic driver for the Hertzinno HZ-FA-371 online acoustic camera — partial discharge and
 gas leak detection with results, photos, records and the sound map video.**
@@ -19,7 +19,12 @@ gas leak detection with results, photos, records and the sound map video.**
 Start a detection and get its result when it is really done (type, intensity, leak rate,
 photos), change every setting, read the camera's records and watch the sound map video. All
 over Ethernet: **HTTP** (token login), **WebSocket** (spectrum, results) and **RTSP** (video),
-Following the vendor manual *Online Acoustic Camera User Manual and API*, Version 5.1 ([docs](docs/Hertzino%20HZ-FA-371.pdf)).
+following the vendor manual *Online Acoustic Camera User Manual and API* V5.1
+([PDF](docs/hz-fa-371_api_v5.1.pdf)).
+
+**Docs:** [API summary](docs/api.md) · [network setup](docs/network.md) ·
+[first run on the camera](docs/first_run.md) · [troubleshooting](docs/troubleshooting.md) ·
+[messages](hertzino_msgs/README.md)
 
 | Package | |
 |---|---|

@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: src/hertzino_driver          # repo berisi hertzino_msgs + hertzino_driver
+          path: src/hertzino_driver          # holds hertzino_msgs and hertzino_driver
       - name: Dependencies
         run: |
           deps() {
