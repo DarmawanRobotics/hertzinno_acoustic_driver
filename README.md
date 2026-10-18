@@ -3,7 +3,7 @@
 # HERTZINO ACUSTIC CAMERA DRIVER
 
 **ROS Noetic driver for the Hertzinno HZ-FA-371 online acoustic camera — partial discharge and
-gas leak detection for substation inspection on a Deep Robotics X30.**
+gas leak detection with results, photos, records and the sound map video.**
 
 
 [![CI](https://github.com/DarmawanRobotics/hertzino_driver/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DarmawanRobotics/hertzino_driver/actions/workflows/ci.yml)
@@ -19,8 +19,7 @@ gas leak detection for substation inspection on a Deep Robotics X30.**
 Start a detection and get its result when it is really done (type, intensity, leak rate,
 photos), change every setting, read the camera's records and watch the sound map video. All
 over Ethernet: **HTTP** (token login), **WebSocket** (spectrum, results) and **RTSP** (video),
-following the vendor manual *Online Acoustic Camera User Manual And API* V5.1
-([docs](docs/)).
+Following the vendor manual *Online Acoustic Camera User Manual and API*, Version 5.1 ([docs](docs/Hertzino%20HZ-FA-371.pdf)).
 
 | Package | |
 |---|---|
