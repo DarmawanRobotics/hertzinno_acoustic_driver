@@ -1,0 +1,19 @@
+# hertzino_camera_node: the camera's RTSP video, the visible image with the sound map drawn on
+# it. host, rtsp_port, user and password come from the launch file.
+path: auto                   # 'auto': ask probe_paths with DESCRIBE until one answers; or e.g. live
+probe_paths: [live, stream, h264, main, video, live/main, stream1, ch0, av0_0, live.sdp, video1, '1', '11', '']
+probe_period: 10.0           # s between rounds while no path answers
+# url: rtsp://admin:<password>@192.168.2.204:443/live   # a full URL skips all of the above
+
+codec: h264                  # the camera encodes H.264 only
+decoder: auto                # auto = Jetson hardware, then GStreamer software, then FFmpeg
+latency_ms: 0                # rtspsrc jitter buffer
+protocols: tcp
+reconnect_sec: 1.0           # first retry delay, doubles up to 30 s
+timeout_ms: 5000
+
+frame_id: hertzino_acoustic_optical_frame
+encoding: bgr8               # bgr8 | mono8
+max_fps: 0.0                 # 0: every frame
+width: 0                     # resize, 0: as streamed
+height: 0

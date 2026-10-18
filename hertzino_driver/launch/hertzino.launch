@@ -1,0 +1,31 @@
+<launch>
+  <arg name="namespace" default="hertzino"/>
+  <arg name="host" default="192.168.2.204"/>
+  <arg name="port" default="80"/>
+  <arg name="user" default="admin"/>
+  <arg name="password" default=""/>
+  <arg name="config" default="$(find hertzino_driver)/config/hertzino.yaml"/>
+  <arg name="camera" default="true"/>
+  <arg name="rtsp_port" default="443"/>
+  <arg name="camera_config" default="$(find hertzino_driver)/config/camera.yaml"/>
+
+  <group ns="$(arg namespace)">
+    <node pkg="hertzino_driver" type="hertzino_acoustic_node" name="acoustic"
+          output="screen" respawn="true" respawn_delay="5">
+      <rosparam command="load" file="$(arg config)"/>
+      <param name="host" type="str" value="$(arg host)"/>
+      <param name="port" type="int" value="$(arg port)"/>
+      <param name="user" type="str" value="$(arg user)"/>
+      <param name="password" type="str" value="$(arg password)"/>
+    </node>
+
+    <node if="$(arg camera)" pkg="hertzino_driver" type="hertzino_camera_node"
+          name="camera" ns="camera" output="screen" respawn="true" respawn_delay="5">
+      <rosparam command="load" file="$(arg camera_config)"/>
+      <param name="host" type="str" value="$(arg host)"/>
+      <param name="rtsp_port" type="int" value="$(arg rtsp_port)"/>
+      <param name="user" type="str" value="$(arg user)"/>
+      <param name="password" type="str" value="$(arg password)"/>
+    </node>
+  </group>
+</launch>
